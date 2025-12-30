@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Promosi Event & Tiket Digital</title>
 <style>
-/* ===== Style Utama ===== */
+/* ===== Umum ===== */
 body {margin:0;font-family:Arial, Helvetica, sans-serif;background:#f5f7fa;color:#333}
 header {position:relative;color:#fff;padding:80px 20px;text-align:center;overflow:hidden}
 header::before {content:"";position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:1}
@@ -100,7 +100,7 @@ button{cursor:pointer}
   </div>
 </section>
 
-<!-- Box Tombol Bergabung -->
+<!-- Box Tombol Modern Bergabung -->
 <section>
   <div class="join-box animate-box">
     <h3>🎉 Bergabung ke Event Sekarang!</h3>
@@ -150,10 +150,9 @@ button{cursor:pointer}
 </div>
 </section>
 
-<!-- Registrasi -->
+<!-- Kontak -->
 <section id="order">
   <h2 style="text-align:center">🎉 Registrasi Event Gratis</h2>
-  <p style="text-align:center">Isi form di bawah, kami bantu strategi agar cepat terselesaikan dan terima bonus</p>
   <form onsubmit="sendWhatsApp(event)" style="max-width:600px;margin:30px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.08)">
     <label>Nama</label>
     <input id="nama" type="text" placeholder="Nama lengkap" required>
@@ -165,16 +164,14 @@ button{cursor:pointer}
   </form>
 </section>
 
-<!-- Footer -->
-<footer>
-  <div style="margin-bottom:15px"><strong>Ikuti Kami</strong></div>
-  <div style="display:flex;justify-content:center;gap:20px;margin-bottom:15px">
-    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"></a>
-    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"></a>
-    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YouTube"></a>
+<!-- CTA -->
+<section class="cta">
+  <h2>Ingin Penghasilan Di Dunia Digital?</h2>
+  <div style="display:flex;justify-content:center;gap:15px;flex-wrap:wrap">
+    <a id="waBtn" href="#" target="_blank">Hubungi via WhatsApp</a>
+    <a id="tgBtn" href="#" target="_blank" style="display:inline-block;padding:12px 30px;background:#0088cc;color:#fff;text-decoration:none;border-radius:30px;font-weight:bold">Hubungi via Telegram</a>
   </div>
-  <div>&copy; 2025 Alpha Digital x Reelshort. All rights reserved.</div>
-</footer>
+</section>
 
 <!-- Modal Admin & Superadmin -->
 <div id="adminModal" class="modal">
@@ -219,99 +216,46 @@ button{cursor:pointer}
 </div>
 
 <script>
-// ====== Helper API URL ======
-const API_URL = 'http://localhost:3000/api';
-
-// ====== Multi Admin Links ======
-async function updateLinks(){
-  const username = sessionStorage.getItem('activeAdmin');
-  if(!username) return;
-  const res = await fetch(`${API_URL}/loginAdmin`,{
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password:''})
-  });
-  const data = await res.json();
-  if(data.success){
-    const a = data.admin;
-    document.getElementById("waBtn").href=`https://wa.me/${a.wa}`;
-    document.getElementById("tgBtn").href=`https://t.me/${a.tg}`;
-    document.getElementById("btnJoinEvent").href=`https://wa.me/${a.wa}`;
-  }
+// ===== Inisialisasi Data Multi-Perangkat =====
+if(!localStorage.getItem("adminData")){
+  localStorage.setItem("adminData", JSON.stringify({
+    superadminPassword:"SUPER123",
+    admins:[{username:"admin1",password:"admin123",wa:"6285786146441",tg:"USERNAME_TELEGRAM"}]
+  }));
 }
+
+// ===== Fungsi Admin Aktif =====
+function setActiveAdmin(username){sessionStorage.setItem('activeAdmin',username);updateLinks();}
+function getActiveAdmin(){const u=sessionStorage.getItem('activeAdmin');const d=JSON.parse(localStorage.getItem("adminData"));return d.admins.find(a=>a.username===u)||d.admins[0];}
+function updateLinks(){const a=getActiveAdmin();document.getElementById("waBtn").href=`https://wa.me/${a.wa}`;document.getElementById("tgBtn").href=`https://t.me/${a.tg}`;document.getElementById("btnJoinEvent").href=`https://wa.me/${a.wa}`;}
+updateLinks();
 
 // ===== Admin UI =====
 function openAdminModal(){document.getElementById('adminModal').style.display='flex';}
 function closeAdminModal(){document.getElementById('adminModal').style.display='none';document.getElementById('adminFormFields').style.display='none';}
-async function checkAdminLoginUI(){
-  const u=document.getElementById('adminUsernameUI').value;
-  const p=document.getElementById('adminPasswordUI').value;
-  const res=await fetch(`${API_URL}/loginAdmin`,{
-    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})
-  });
-  const data=await res.json();
-  if(data.success){
-    document.getElementById('adminFormFields').style.display='block';
-    document.getElementById('adminWAUI').value=data.admin.wa;
-    document.getElementById('adminTGUI').value=data.admin.tg;
-    sessionStorage.setItem('activeAdmin',u);
-    updateLinks();
-  } else alert('Login admin gagal!');
-}
+function checkAdminLoginUI(){const u=document.getElementById('adminUsernameUI').value,p=document.getElementById('adminPasswordUI').value,d=JSON.parse(localStorage.getItem("adminData")),a=d.admins.find(x=>x.username===u && x.password===p);if(a){document.getElementById('adminFormFields').style.display='block';document.getElementById('adminWAUI').value=a.wa;document.getElementById('adminTGUI').value=a.tg;setActiveAdmin(a.username);}else alert("Login admin gagal!");}
 document.getElementById('adminPasswordUI').addEventListener('keypress',function(e){if(e.key==='Enter')checkAdminLoginUI();});
-async function saveAdminUI(){
-  const u=sessionStorage.getItem('activeAdmin');
-  const wa=document.getElementById('adminWAUI').value;
-  const tg=document.getElementById('adminTGUI').value;
-  const res=await fetch(`${API_URL}/updateAdmin`,{
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u,wa,tg})
-  });
-  const data=await res.json();
-  if(data.success){updateLinks(); alert("Nomor berhasil diperbarui!"); closeAdminModal();}
-}
+function saveAdminUI(){const u=sessionStorage.getItem('activeAdmin'),d=JSON.parse(localStorage.getItem("adminData")),a=d.admins.find(x=>x.username===u);if(a){a.wa=document.getElementById('adminWAUI').value;a.tg=document.getElementById('adminTGUI').value;localStorage.setItem("adminData",JSON.stringify(d));updateLinks();alert("Nomor berhasil diperbarui!");closeAdminModal();}}
 
 // ===== Superadmin UI =====
-function openSuperModal(){document.getElementById('superModal').style.display='flex'; updateDeleteDropdown();}
-function closeSuperModal(){document.getElementById('superModal').style.display='none'; document.getElementById('superFormFields').style.display='none';}
-async function checkSuperLoginUI(){
-  const pw=document.getElementById('superPasswordUI').value;
-  const res=await fetch(`${API_URL}/loginSuper`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-  const data=await res.json();
-  if(data.success) document.getElementById('superFormFields').style.display='block'; else alert('Password superadmin salah!');
-}
+function openSuperModal(){document.getElementById('superModal').style.display='flex';updateDeleteDropdown();}
+function closeSuperModal(){document.getElementById('superModal').style.display='none';document.getElementById('superFormFields').style.display='none';}
+function checkSuperLoginUI(){const pw=document.getElementById('superPasswordUI').value,d=JSON.parse(localStorage.getItem("adminData"));if(pw===d.superadminPassword)document.getElementById('superFormFields').style.display='block';else alert("Password superadmin salah!");}
 document.getElementById('superPasswordUI').addEventListener('keypress',function(e){if(e.key==='Enter')checkSuperLoginUI();});
-async function addAdminUI(){
-  const u=document.getElementById('newAdminUsername').value;
-  const p=document.getElementById('newAdminPassword').value;
-  const wa=document.getElementById('newAdminWA').value;
-  const tg=document.getElementById('newAdminTG').value;
-  const res=await fetch(`${API_URL}/addAdmin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p,wa,tg})});
-  const data=await res.json();
-  if(data.success){ alert("Admin baru berhasil ditambahkan!"); updateDeleteDropdown(); }
-}
-async function deleteAdminUI(){
-  const u=document.getElementById('deleteAdminSelect').value;
-  const res=await fetch(`${API_URL}/deleteAdmin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u})});
-  const data=await res.json();
-  if(data.success){ alert("Admin berhasil dihapus!"); updateDeleteDropdown(); }
-}
-async function updateDeleteDropdown(){
-  const res=await fetch(`${API_URL}/listAdmins`);
-  const data=await res.json();
-  const sel=document.getElementById('deleteAdminSelect');
-  sel.innerHTML='';
-  data.admins.forEach(a=>{const opt=document.createElement('option'); opt.value=a.username; opt.text=a.username; sel.add(opt);});
-}
+function addAdminUI(){const d=JSON.parse(localStorage.getItem("adminData")),u=document.getElementById('newAdminUsername').value,p=document.getElementById('newAdminPassword').value,wa=document.getElementById('newAdminWA').value,tg=document.getElementById('newAdminTG').value;d.admins.push({username:u,password:p,wa,tg});localStorage.setItem("adminData",JSON.stringify(d));updateDeleteDropdown();alert("Admin baru berhasil ditambah!");}
+function updateDeleteDropdown(){const sel=document.getElementById('deleteAdminSelect');sel.innerHTML='';const d=JSON.parse(localStorage.getItem("adminData"));d.admins.forEach(a=>{const o=document.createElement('option');o.value=a.username;o.textContent=a.username;sel.appendChild(o);});}
+function deleteAdminUI(){const u=document.getElementById('deleteAdminSelect').value,d=JSON.parse(localStorage.getItem("adminData"));d.admins=d.admins.filter(a=>a.username!==u);localStorage.setItem("adminData",JSON.stringify(d));updateDeleteDropdown();alert("Admin berhasil dihapus!");if(sessionStorage.getItem('activeAdmin')===u){sessionStorage.removeItem('activeAdmin');updateLinks();}}
+
+// ===== Testimoni Slider =====
+const track=document.querySelector('.testimonial-track'),slides=document.querySelectorAll('.testimonial'),prev=document.querySelector('.testi-btn.prev'),next=document.querySelector('.testi-btn.next');let index=0;
+function showSlide(i){track.style.transform=`translateX(${-i*100}%)`;}
+if(prev && next && track){prev.addEventListener('click',()=>{index=(index-1+slides.length)%slides.length;showSlide(index);});next.addEventListener('click',()=>{index=(index+1)%slides.length;showSlide(index);});showSlide(index);}
+
+// ===== Animasi Join Box =====
+window.addEventListener('scroll',()=>{document.querySelectorAll('.animate-box').forEach(b=>{const top=b.getBoundingClientRect().top;if(top<window.innerHeight-100)b.classList.add('visible');});});
 
 // ===== Form WA =====
-function sendWhatsApp(e){
-  e.preventDefault();
-  const n=document.getElementById('nama').value;
-  const p=document.getElementById('pesan').value;
-  const t=document.getElementById('email').value;
-  const username=sessionStorage.getItem('activeAdmin');
-  if(!username){ alert("Login admin terlebih dahulu!"); return; }
-  fetch(`${API_URL}/loginAdmin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password:''})})
-  .then(r=>r.json()).then(data=>{if(data.success) window.open(`https://wa.me/${data.admin.wa}?text=Nama:%20${n}%0ANo%20Telp:%20${t}%0APesan:%20${p}`);});
-}
+function sendWhatsApp(e){e.preventDefault();const n=document.getElementById('nama').value,p=document.getElementById('pesan').value,t=document.getElementById('email').value,active=getActiveAdmin();window.open(`https://wa.me/${active.wa}?text=Nama:%20${n}%0ANo%20Telp:%20${t}%0APesan:%20${p}`);}
 </script>
 </body>
 </html>
