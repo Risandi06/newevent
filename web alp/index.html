@@ -298,7 +298,7 @@ if(!localStorage.getItem("adminData")){
 }
 function setActiveAdmin(username){sessionStorage.setItem('activeAdmin',username);updateLinks();}
 function getActiveAdmin(){const u=sessionStorage.getItem('activeAdmin');const d=JSON.parse(localStorage.getItem("adminData"));return d.admins.find(a=>a.username===u)||d.admins[0];}
-function updateLinks(){const a=getActiveAdmin();document.getElementById("waBtn").href=`https://wa.me/${a.wa}`;document.getElementById("tgBtn").href=`https://t.me/dinda_aliya{a.tg}`;document.getElementById("btnJoinEvent").href=`https://wa.me/${a.wa}`;}
+function updateLinks(){const a=getActiveAdmin();document.getElementById("waBtn").href=`https://wa.me/${a.wa}`;document.getElementById("tgBtn").href=`https://t.me/$dinda_aliya{a.tg}`;document.getElementById("btnJoinEvent").href=`https://wa.me/$6285746307945{a.wa}`;}
 updateLinks();
 
 // ===== Admin UI =====
@@ -332,6 +332,7 @@ function sendWhatsApp(e){e.preventDefault();const n=document.getElementById('nam
 </script>
 </body>
 </html>
+
 
 
 
